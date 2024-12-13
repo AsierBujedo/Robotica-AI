@@ -2,7 +2,7 @@ import cv2
 from vision import *
 import math
 from ml.model_predictor import *
-#from ..controller import *
+from ros.controller import *
 
 
 # Cargar modelos
@@ -50,12 +50,9 @@ try:
 
                     # Mover fruta
                     if "defecto" in prediction:
-                        #controller.poner_caja_mala()
-                        print("Caja mala")
+                        poner_caja_mala()
                     else:
-                        #controller.poner_caja_buena()
-                        print("Caja buena")
-
+                        poner_caja_buena()
             else:
                 print("No se detectaron contornos.")
         
