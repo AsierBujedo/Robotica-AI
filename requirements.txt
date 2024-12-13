@@ -1,0 +1,12 @@
+joblib
+numpy
+opencv-contrib-python
+pandas
+pip
+python-dateutil
+pytz
+scikit-learn
+scipy
+six
+threadpoolctl
+tzdata
