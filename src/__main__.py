@@ -6,8 +6,6 @@ from ros.camera_subscriber import *
 import rospy
 
 if __name__ == "__main__":
-    rospy.init_node("nodo_vision", anonymous=True)  # Inicializar nodo ROS
-
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
@@ -22,7 +20,7 @@ if __name__ == "__main__":
                 continue
 
             # Mostrar imagen en vivo
-            cv2.imshow('Cámara en vivo', frame)
+            cv2.imshow('Camara', frame)
             key = cv2.waitKey(1) & 0xFF
 
             # Procesar imagen al presionar la tecla 'c'
