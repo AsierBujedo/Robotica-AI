@@ -6,7 +6,7 @@ from ros.camera_subscriber import *
 import rospy
 
 if __name__ == "__main__":
-    rospy.init_node("nodo_vision", anonymous=True)
+    rospy.init_node("nodo_vision", anonymous=True)  # Inicializar nodo ROS
 
     # Consumir imagen de la cámara
     nc = NodoCamara()
