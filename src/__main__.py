@@ -3,17 +3,25 @@ from vision.vision import *
 from ml.model_predictor import *
 from ros.controller import *
 from ros.camera_subscriber import *
+from ros.force_detector import *
 import rospy
+import time
 
 if __name__ == "__main__":
+    rospy.init_node("nodo_principal", anonymous=True)
+
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
-    # Detectar golpes
+    # Suscripción al tópico de fuerza
     nf = NodoFuerza(umbral_fuerza=5.0)
 
     # Cargar modelos
     clf, le = load_models('src/ml/model/random_forest_model.pkl', 'src/ml/model/label_encoder.pkl')
+
+    # Cooldown entre detecciones
+    COOLDOWN_TIME = 3.0
+    last_action_time = 0
 
     try:
         while not rospy.is_shutdown():
@@ -26,8 +34,13 @@ if __name__ == "__main__":
             cv2.imshow('Camara', frame)
             key = cv2.waitKey(1) & 0xFF
 
-            # Procesar imagen al presionar la tecla 'c'
-            if key == ord('c') or nf.golpe_detectado():  
+            # Detectar golpe o presionar tecla 'c'
+            current_time = time.time()
+            if (key == ord('c') or nf.golpe_detectado()) and (current_time - last_action_time > COOLDOWN_TIME):
+                # Actualizar el tiempo de la última acción
+                last_action_time = current_time
+
+                rospy.loginfo("Iniciando procesamiento...")
                 bright_image, blurred, edges, contours_image, contours = process_image(frame)
 
                 if contours:
@@ -57,7 +70,10 @@ if __name__ == "__main__":
                             poner_caja_buena()
                 else:
                     print("No se detectaron contornos.")
-            
+                
+                # Esperar un tiempo después de la acción
+                rospy.sleep(COOLDOWN_TIME)
+
             # Salir al presionar 'q'
             elif key == ord('q'):  
                 break
