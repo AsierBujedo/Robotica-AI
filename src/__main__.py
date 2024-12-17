@@ -9,6 +9,9 @@ if __name__ == "__main__":
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
+    # Detectar golpes
+    nf = NodoFuerza(umbral_fuerza=5.0)
+
     # Cargar modelos
     clf, le = load_models('src/ml/model/random_forest_model.pkl', 'src/ml/model/label_encoder.pkl')
 
@@ -24,7 +27,7 @@ if __name__ == "__main__":
             key = cv2.waitKey(1) & 0xFF
 
             # Procesar imagen al presionar la tecla 'c'
-            if key == ord('c'):  
+            if key == ord('c') or nf.golpe_detectado():  
                 bright_image, blurred, edges, contours_image, contours = process_image(frame)
 
                 if contours:
