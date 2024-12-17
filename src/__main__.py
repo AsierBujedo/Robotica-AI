@@ -3,7 +3,7 @@ from vision.vision import *
 from ml.model_predictor import *
 from ros.controller import *
 from ros.camera_subscriber import *
-from ros.efforts_trigger import *
+from ros.effort_trigger import *
 import rospy
 import time
 
