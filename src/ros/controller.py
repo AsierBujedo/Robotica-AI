@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 from ros.commands import Command, CommandQueue
 
 queue = CommandQueue()
