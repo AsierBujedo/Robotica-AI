@@ -8,8 +8,6 @@ import rospy
 import time
 
 if __name__ == "__main__":
-    rospy.init_node("nodo_vision", anonymous=True)
-
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
