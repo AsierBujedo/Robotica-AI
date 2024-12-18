@@ -6,13 +6,14 @@ from ros.camera_subscriber import *
 from ros.effort_trigger import *
 import rospy
 import time
+import threading
 
-if __name__ == "__main__":
+def main():
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
     # Suscripción al tópico de fuerza
-    nf = NodoFuerza(umbral_fuerza=5.0)
+    nf = NodoFuerza(umbral_fuerza=20.0)
 
     # Cargar modelos
     clf, le = load_models('src/ml/model/random_forest_model.pkl', 'src/ml/model/label_encoder.pkl')
@@ -34,7 +35,7 @@ if __name__ == "__main__":
 
             # Detectar golpe o presionar tecla 'c'
             current_time = time.time()
-            if (key == ord('c') or nf.golpe_detectado()) and (current_time - last_action_time > COOLDOWN_TIME):
+            if (key == ord('c') or nf.golpe_detectado()) and (current_time - last_action_time >= COOLDOWN_TIME):
                 # Actualizar el tiempo de la última acción
                 last_action_time = current_time
 
@@ -63,14 +64,13 @@ if __name__ == "__main__":
 
                         # Mover fruta
                         if "defecto" in prediction:
-                            poner_caja_mala()
+                            th = threading.Thread(target=poner_caja_mala)
+                            th.start()
                         else:
-                            poner_caja_buena()
+                            th = threading.Thread(target=poner_caja_buena)
+                            th.start()
                 else:
                     print("No se detectaron contornos.")
-                
-                # Esperar un tiempo después de la acción
-                rospy.sleep(COOLDOWN_TIME)
 
             # Salir al presionar 'q'
             elif key == ord('q'):  
@@ -82,3 +82,6 @@ if __name__ == "__main__":
     finally:
         cv2.destroyAllWindows()
         print("Cámara liberada y ventanas cerradas.")
+        
+if __name__ == "__main__":
+    main()
