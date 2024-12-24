@@ -25,7 +25,7 @@ class CommandQueue:
     rate = None
 
     def __init__(self) -> None:
-        rospy.init_node('nodo_vision', anonymous=True)
+        rospy.init_node("nodo_vision", anonymous=True)
         self.pub = rospy.Publisher('/consignas', Int32, queue_size=20)
         self.rate = rospy.Rate(1)
 

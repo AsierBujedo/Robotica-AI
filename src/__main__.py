@@ -3,14 +3,24 @@ from vision.vision import *
 from ml.model_predictor import *
 from ros.controller import *
 from ros.camera_subscriber import *
+from ros.effort_trigger import *
 import rospy
+import time
+import threading
 
-if __name__ == "__main__":
+def main():
     # Consumir imagen de la cámara
     nc = NodoCamara()
 
+    # Suscripción al tópico de fuerza
+    nf = NodoFuerza(umbral_fuerza=20.0)
+
     # Cargar modelos
     clf, le = load_models('src/ml/model/random_forest_model.pkl', 'src/ml/model/label_encoder.pkl')
+
+    # Cooldown entre detecciones
+    COOLDOWN_TIME = 3.0
+    last_action_time = 0
 
     try:
         while not rospy.is_shutdown():
@@ -23,8 +33,13 @@ if __name__ == "__main__":
             cv2.imshow('Camara', frame)
             key = cv2.waitKey(1) & 0xFF
 
-            # Procesar imagen al presionar la tecla 'c'
-            if key == ord('c'):  
+            # Detectar golpe o presionar tecla 'c'
+            current_time = time.time()
+            if (key == ord('c') or nf.golpe_detectado()) and (current_time - last_action_time >= COOLDOWN_TIME):
+                # Actualizar el tiempo de la última acción
+                last_action_time = current_time
+
+                rospy.loginfo("Iniciando procesamiento...")
                 bright_image, blurred, edges, contours_image, contours = process_image(frame)
 
                 if contours:
@@ -49,12 +64,14 @@ if __name__ == "__main__":
 
                         # Mover fruta
                         if "defecto" in prediction:
-                            poner_caja_mala()
+                            th = threading.Thread(target=poner_caja_mala)
+                            th.start()
                         else:
-                            poner_caja_buena()
+                            th = threading.Thread(target=poner_caja_buena)
+                            th.start()
                 else:
                     print("No se detectaron contornos.")
-            
+
             # Salir al presionar 'q'
             elif key == ord('q'):  
                 break
@@ -65,3 +82,6 @@ if __name__ == "__main__":
     finally:
         cv2.destroyAllWindows()
         print("Cámara liberada y ventanas cerradas.")
+        
+if __name__ == "__main__":
+    main()
